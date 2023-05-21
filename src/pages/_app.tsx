@@ -2,7 +2,7 @@
 import "../styles/global.css";
 import type { CustomAppPage, AppProps } from "next/app";
 import { AppMantineProvider, GlobalStyleProvider } from "src/lib/mantine";
-// import { SessionProvider, getSession } from "next-auth/react";
+import { SessionProvider, getSession } from "next-auth/react";
 // import { AuthProvider } from "src/context/auth-context";
 // import type { GetServerSideProps } from "next";
 // import { parseCookies } from "nookies";
@@ -75,10 +75,12 @@ const MyApp: CustomAppPage = ({
   return (
     <GlobalStyleProvider>
       <WagmiConfig client={client}>
-        <AppMantineProvider>
-          <Component {...pageProps} />
-          <Notifications />
-        </AppMantineProvider>
+        <SessionProvider session={session}>
+          <AppMantineProvider>
+            <Component {...pageProps} />
+            <Notifications />
+          </AppMantineProvider>
+        </SessionProvider>
       </WagmiConfig>
     </GlobalStyleProvider>
   );

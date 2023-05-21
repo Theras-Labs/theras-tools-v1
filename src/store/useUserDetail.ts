@@ -3,13 +3,22 @@ import { useEffect } from "react";
 import { create } from "zustand";
 import { useSession } from "next-auth/react";
 import { db } from "../../firebase.config";
-import { collection, where, getDocs, query } from "firebase/firestore";
+import {
+  collection,
+  where,
+  getDocs,
+  query,
+  doc,
+  setDoc,
+} from "firebase/firestore";
 import Cookies from "js-cookie";
+import { notifications } from "@mantine/notifications";
 
 export const useUserDataStore = create((set, get) => ({
   userData: null,
   loading: true,
   error: null,
+  errorSocials: null,
   userID: null,
   subscription: null,
   subscriptionActive: null,
@@ -77,8 +86,32 @@ export const useUserDataStore = create((set, get) => ({
         }
       } catch (error) {
         console.log(error, "ERROR STORE USER");
-        set({ userData: null, loading: false, error: error.message });
       }
+  },
+
+  addSocials: async (handler = "", handlerType = "", userID = "") => {
+    set({ loading: true, error: null });
+
+    const documentPath = `users/${userID}`;
+    const updatedFields = {
+      [handlerType]: handler,
+    };
+
+    const documentRef = doc(db, documentPath);
+
+    notifications.show({
+      message: "sucess",
+    });
+
+    try {
+      await setDoc(documentRef, updatedFields, { merge: true });
+      console.log("Document handlerType  successfully updated!");
+      set({
+        userData: { ...get().userData, ...updatedFields },
+      });
+    } catch (error) {
+      console.error("Error updating document: ", error);
+    }
   },
 }));
 
