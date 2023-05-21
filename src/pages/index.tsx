@@ -91,12 +91,12 @@ export default ({ profile, handlerName, notFound }) => {
                 <br />
                 <br />
                 {[
-                  "effort score",
-                  "lucky score",
-                  "badluck score",
-                  "parasite score",
-                  "loyalty score",
-                  "challenger score",
+                  "Contribution points",
+                  "lucky points",
+                  "badluck points",
+                  "parasite points",
+                  "loyalty points",
+                  "challenger points",
                 ].map((item, i) => (
                   <div
                     className={`${colorClasses[i % colorClasses.length]} `}

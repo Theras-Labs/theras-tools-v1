@@ -43,6 +43,7 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.NEXT_PUBLIC_GOOGLE_SECRET as any,
     }),
   ],
+  secret: process.env.NEXTAUTH_SECRET,
   // theme: {
   //   colorScheme: "light",
   // },
