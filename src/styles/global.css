@@ -1,7 +1,8 @@
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
-:root {
+
+/* :root:not(.widget) {
   color: white !important;
-  background: #0a192f;
-}
+  background: #0a192f !important;
+} */

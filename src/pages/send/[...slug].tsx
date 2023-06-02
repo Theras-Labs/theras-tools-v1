@@ -23,6 +23,8 @@ import {
   where,
 } from "firebase/firestore";
 import { notifications } from "@mantine/notifications";
+import CryptoSection from "src/components/send/CryptoSection";
+import { useAccount } from "wagmi";
 
 /* eslint-disable */
 // if starts as 0x
@@ -44,14 +46,16 @@ export default ({ profile, handlerName }) => {
     fromName: "",
     value: null,
   });
+  const { address } = useAccount();
 
   return (
-    <div className="bg-main-blue w-full h-full my-10">
+    <div className="border-red-500   w-full min-h-screen h-full p-8 lg:p-24 bg-main-blue">
       {/* NETWORK, CONNECT -> LOGIN
 THERAS */}
       <Container>
         <div className="bg-secondary-gray my-4 rounded-md font-bold p-10">
           Profile: {profile?.handler}
+          {/* DETECT RUN SESSION OR NOT */}
         </div>
 
         {/* form amount */}
@@ -66,7 +70,12 @@ THERAS */}
             </Tabs.List>
 
             <Tabs.Panel value="crypto" pt="xs">
-              <CryptoContent />
+              <CryptoSection
+                {...{
+                  state,
+                  setState,
+                }}
+              />
             </Tabs.Panel>
             <Tabs.Panel value="cards" pt="xs">
               {/* Visa types */}
@@ -80,10 +89,12 @@ THERAS */}
               or
               <div className="flex">
                 <TextInput
-                  disabled
+                  // disabled
                   // disabled={!!select}
                   // value={!!select ? select?.category_title : state?.category_title}
-                  // onChange={(e) => setState({ ...state, category_title: e.target.value })}
+                  onChange={(e) =>
+                    setState({ ...state, value: e.target.value })
+                  }
                   placeholder="$1000"
                   label="Custom amount"
                 />
@@ -99,13 +110,34 @@ THERAS */}
             labelPosition="center"
           />
           <br />
-          <FormSender />
+          {address && (
+            <div className="flex">
+              Wallet Address: &nbsp;{" "}
+              <span className="text-green-600">{address}</span>
+            </div>
+          )}
+          <br />
+          <FormSender
+            {...{
+              state,
+              setState,
+            }}
+          />
           <br />
 
           {/* INFORM AGAIN CRYPTO AND VISA info */}
           <Button
             onClick={async () => {
+              // if pay with cards
+
+              //if pay with visa
+              if (!state?.value && !state?.fromName)
+                return notifications.show({
+                  message: `Missing fields `,
+                });
+
               //push notification
+              // TODO: MOVE IT INTO API
               const collectionPath = "widget-msg"; // Replace "collectionName" with the name of your Firestore collection
               const newData = {
                 message: state?.message,
@@ -116,6 +148,13 @@ THERAS */}
                 createdAt: Math.floor(Date.now() / 1000),
                 // Add more fields and values as needed
                 //createdBy: email | id | real name
+
+                test: false,
+                from: state?.fromName, //send_as
+                //fromUsername:
+                // address: email | eth_address
+                // tx_hash:
+                // Add more fields and values as needed
               };
               try {
                 const docRef = await addDoc(
@@ -132,7 +171,7 @@ THERAS */}
                 message: `Sending notification `,
               });
             }}
-            disabled
+            // disabled
             className="bg-red-600"
           >
             Send
@@ -184,76 +223,13 @@ export async function getServerSideProps({ params }) {
 
 // LOAD USERS
 
-const CryptoContent = () => {
-  // const
-  return (
-    <div className="">
-      <Code>The amount will be auto convert to wei</Code>
-      <br />
-      <br />
-      <div className="flex items-end ">
-        <TextInput
-          // disabled={!!select}
-          // value={!!select ? select?.category_title : state?.category_title}
-          // onChange={(e) => setState({ ...state, category_title: e.target.value })}
-          placeholder="Amount"
-          label="Send TFUEL"
-        />
-        {/* <Button className="bg-red-600 ml-2">Send</Button> */}
-      </div>
-      or
-      <div className="flex items-end ">
-        <TextInput
-          className="mr-2"
-          // disabled={!!select}
-          // value={!!select ? select?.category_title : state?.category_title}
-          // onChange={(e) => setState({ ...state, category_title: e.target.value })}
-          placeholder="Amount"
-          label="Send TNT-20"
-        />
-        <Select
-          label="Coin"
-          defaultValue="WETH"
-          placeholder="WETH"
-          data={[
-            { value: "Custom", label: "Custom" },
-            { value: "THERAS", label: "Theras-CHIP" },
-            { value: "WETH", label: "WETH" },
-            { value: "USDT", label: "USDT" },
-            { value: "silver", label: "DAI" },
-            { value: "gold", label: "USDC" },
-          ]}
-        />
-        <TextInput
-          className="ml-2"
-          disabled
-          placeholder="0x..."
-          label={"Token Address"}
-        />
-      </div>
-      <div className="flex items-end mt-2">
-        <TextInput className="mr-2 invisible" />
-        <TextInput
-          className=""
-          disabled
-          // disabled={!!select}
-          // value={!!select ? select?.category_title : state?.category_title}
-          // onChange={(e) => setState({ ...state, category_title: e.target.value })}
-          placeholder="..."
-          label={"My Balance " + "WETH"}
-        />
-      </div>
-    </div>
-  );
-};
-
-const FormSender = () => {
+const FormSender = ({ state, setState, loading }) => {
   return (
     <>
       <TextInput
         // disabled={!!select}
         // value={!!select ? select?.category_title : state?.category_title}
-        // onChange={(e) => setState({ ...state, category_title: e.target.value })}
+        onChange={(e) => setState({ ...state, fromName: e.target.value })}
         placeholder="Fans No.1"
         label="Send As"
         withAsterisk
@@ -262,7 +238,7 @@ const FormSender = () => {
       <Textarea
         // disabled={!!select}
         // value={!!select ? select?.category_title : state?.category_title}
-        // onChange={(e) => setState({ ...state, category_title: e.target.value })}
+        onChange={(e) => setState({ ...state, message: e.target.value })}
         placeholder=""
         label="Msg"
         withAsterisk
